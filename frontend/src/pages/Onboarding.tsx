@@ -1,8 +1,6 @@
-'use client';
-
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { signInAnonymously, createProfile } from '../../lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { signInAnonymously, createProfile } from '../lib/supabase';
 
 const AVATAR_OPTIONS = ['😊', '😎', '🌟', '🌈', '🦋', '🌸', '🎨', '🎭', '🎵', '🌿'];
 
@@ -11,7 +9,7 @@ export default function Onboarding() {
   const [selectedAvatar, setSelectedAvatar] = useState('😊');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +47,7 @@ export default function Onboarding() {
       }
 
       // Redirect to dashboard
-      router.push('/dashboard');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
       setLoading(false);

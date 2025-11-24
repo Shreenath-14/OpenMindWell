@@ -1,9 +1,7 @@
-'use client';
-
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getSession, getCurrentUser, getProfile, signOut } from '../../lib/supabase';
-import { roomsApi, resourcesApi } from '../../lib/api';
+import { useNavigate } from 'react-router-dom';
+import { getSession, getCurrentUser, getProfile, signOut } from '../lib/supabase';
+import { roomsApi, resourcesApi } from '../lib/api';
 
 type Tab = 'rooms' | 'journal' | 'habits' | 'resources';
 
@@ -11,7 +9,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('rooms');
   const [profile, setProfile] = useState<any>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
@@ -20,7 +18,7 @@ export default function Dashboard() {
   async function checkAuth() {
     const session = await getSession();
     if (!session) {
-      router.push('/');
+      navigate('/');
       return;
     }
 
@@ -35,7 +33,7 @@ export default function Dashboard() {
 
   async function handleSignOut() {
     await signOut();
-    router.push('/');
+    navigate('/');
   }
 
   if (loading) {

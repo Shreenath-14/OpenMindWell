@@ -1,13 +1,10 @@
-'use client';
-
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { getSession } from '../lib/supabase';
-import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkSession();
@@ -16,7 +13,7 @@ export default function Home() {
   async function checkSession() {
     const session = await getSession();
     if (session) {
-      router.push('/dashboard');
+      navigate('/dashboard');
     } else {
       setLoading(false);
     }
@@ -58,7 +55,7 @@ export default function Home() {
           </p>
         </div>
 
-        <Link href="/onboarding" className="btn-primary inline-block text-lg px-8 py-3">
+        <Link to="/onboarding" className="btn-primary inline-block text-lg px-8 py-3">
           Get Started →
         </Link>
       </div>
