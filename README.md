@@ -1,5 +1,7 @@
 # OpenMindWell 🌱
 
+![Landing Page Glimpse for OpenMindWell](image.png)
+
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 ![Built by](https://img.shields.io/badge/Built%20by-Team%20ZenYukti-purple)
