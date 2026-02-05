@@ -6,52 +6,30 @@ on:
   issues:
     types: [opened]
 
-  permissions:
-    contents: read
-    issues: write
-    pull-requests: write
-    statuses: write
+# Force permissions at the top level
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
 
 jobs:
-  # JOB 1: Welcome for EVERY Issue and PR (No first-time filter)
   welcome_test:
-    if: github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
-      - name: Force Test Comment
-        uses: actions/github-script@v6
+      - name: Post Comment
+        uses: actions/github-script@v7 # Updated to v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }} # Explicitly pass the token
           script: |
-            const isPR = !!context.payload.pull_request;
             const banner = `<picture>
               <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-dark.png">
               <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-bright.png">
               <img alt="ZenYukti Banner" src="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-bright.png" width="800">
             </picture>`;
             
-            const message = isPR 
-              ? `${banner}\n\n## Yay! Force Test PR Success! 🎉\n\nThis is a test to see the PR banner.` 
-              : `${banner}\n\n## Welcome! Force Test Issue Success! 🚀\n\nThis is a test to see the Issue banner.`;
-            
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: message
-            });
-
-  # JOB 2: Celebrate EVERY Merge (No first-time filter)
-  celebrate_test:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Force Merge Celebration
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `## Mission Accomplished! 🏆\n\nTest Merge successful! Your code is now part of ZenYukti.`
+              issue_number: context.issue.number || context.payload.issue.number || context.payload.pull_request.number,
+              body: `${banner}\n\n## ZenYukti Bot is Live! 🚀`
             });
