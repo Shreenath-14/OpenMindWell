@@ -1,0 +1,75 @@
+name: ZenYukti Welcome & Success Bot
+on:
+  pull_request_target:
+    types: [opened, closed]
+  issues:
+    types: [opened]
+
+jobs:
+  # JOB 1: Welcome for First Issue and First PR Opening
+  welcome_new_users:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: First Interaction Welcome
+        uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # MESSAGE FOR FIRST EVER ISSUE
+          issue-message: |
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-dark.png">
+              <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-bright.png">
+              <img alt="ZenYukti Banner" src="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-bright.png" width="800">
+            </picture>
+
+            ## Welcome to the ZenYukti Community! 🚀
+
+            Thank you for opening your first issue! We believe that every great project starts with a single conversation. Our team will review this shortly.
+
+            **While you wait, feel free to:**
+            * Check our **[CONTRIBUTING Guidelines](https://github.com/ZenYukti/.github/blob/main/CONTRIBUTING.md)**
+            * Join our [Discord Server](https://go.zenyukti.in/discord)
+            * Explore other **Open Issues**
+
+          # MESSAGE FOR FIRST EVER PR
+          pr-message: |
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-dark.png">
+              <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-bright.png">
+              <img alt="ZenYukti Banner" src="https://raw.githubusercontent.com/ZenYukti/zenyukti.github.io/main/public/assets/branding/gh-bright.png" width="800">
+            </picture>
+
+            ## Yay! You're officially a Contributor! 🎉
+
+            Huge thanks for opening this Pull Request. Being a contributor to **ZenYukti** is a big deal, and we’re excited to have you on board.
+
+            **Next Steps:**
+            1. A maintainer will review your code soon.
+            2. Please ensure you've linked an **assigned issue** in the description.
+            3. Stay tuned for feedback!
+
+  # JOB 2: Celebrate ONLY when the First PR is Merged
+  celebrate_merge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if first-time contributor
+        id: check_first
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const author = context.payload.pull_request.user.login;
+            const res = await github.rest.search.issuesAndPullRequests({
+              q: `is:pr is:merged author:${author} repo:${owner}/${repo}`
+            });
+            // If this is the only merged PR, it's their first!
+            if (res.data.total_count === 1) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: context.issue.number,
+                body: `## Mission Accomplished! 🏆\n\nCongratulations on merging your first PR into ZenYukti! Your code is now officially part of the project.\n\nWe appreciate your hard work and can't wait to see what you build next. Keep the momentum going!`
+              });
+            }
