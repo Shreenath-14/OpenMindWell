@@ -21,6 +21,53 @@ interface Config {
   };
 }
 
+
+// 1. Define what needs to be validated
+export const validateConfig = () => {
+  const errors: string[] = [];
+
+  // Check for missing variables
+  const required = [
+    'SUPABASE_URL',
+    'SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'FRONTEND_URL'
+  ];
+
+  required.forEach(varName => {
+    if (!process.env[varName]) {
+      errors.push(`${varName} is missing`); // Clear error message
+    }
+  });
+
+  // 2. Validate URL formats
+  const validateUrl = (url: string | undefined, name: string) => {
+    if (url) {
+      try {
+        new URL(url);
+      } catch {
+        errors.push(`${name} is not a valid URL format`); // URL validation
+      }
+    }
+  };
+
+  validateUrl(process.env.SUPABASE_URL, 'SUPABASE_URL');
+  validateUrl(process.env.FRONTEND_URL, 'FRONTEND_URL');
+
+  // 3. Validate PORT is actually a number
+  if (process.env.PORT && isNaN(Number(process.env.PORT))) {
+    errors.push('PORT must be a valid number'); // Number validation
+  }
+
+  // If there are any errors, throw a combined helpful message
+  if (errors.length > 0) {
+    throw new Error(
+      `\n❌ Configuration Error:\n${errors.map(err => `  - ${err}`).join('\n')}\n` +
+      `Please fix these in your .env file before restarting the server.\n`
+    );
+  }
+};
+
 const config: Config = {
   supabase: {
     url: process.env.SUPABASE_URL || '',
@@ -40,21 +87,5 @@ const config: Config = {
   },
 };
 
-// Validation
-const requiredEnvVars = [
-  'SUPABASE_URL',
-  'SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'FRONTEND_URL',
-];
-
-const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
-
-if (missingVars.length > 0) {
-  throw new Error(
-    `Missing required environment variables: ${missingVars.join(', ')}\n` +
-      'Please check your .env file and ensure all required variables are set.'
-  );
-}
 
 export default config;
