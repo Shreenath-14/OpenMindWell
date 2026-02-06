@@ -28,13 +28,29 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Map<string, string>>(new Map()); // userId -> nickname
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const lastTypingSent = useRef<number>(0);
 
   const handleMessage = useCallback((message: any) => {
     if (message.type === 'history') {
       // Load message history
       setMessages(message.messages || []);
     } else if (message.type === 'chat') {
+      // Remove user from typing list immediately when they send a message
+      setTypingUsers((prev) => {
+        const next = new Map(prev);
+        if (next.has(message.userId)) {
+          next.delete(message.userId);
+          // Clear timeout if exists
+          const timeout = typingTimeoutRefs.current.get(message.userId);
+          if (timeout) clearTimeout(timeout);
+          typingTimeoutRefs.current.delete(message.userId);
+        }
+        return next;
+      });
+
       // Add new chat message
       setMessages((prev) => [
         ...prev,
@@ -79,10 +95,35 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
     } else if (message.type === 'crisis_alert') {
       setShowCrisisAlert(true);
       setTimeout(() => setShowCrisisAlert(false), 10000);
+    } else if (message.type === 'user_typing') {
+      // Handle user typing
+      if (message.userId !== currentUser.id) {
+        setTypingUsers((prev) => {
+          const next = new Map(prev);
+          next.set(message.userId, message.nickname);
+          return next;
+        });
+
+        // Clear existing timeout
+        const existingTimeout = typingTimeoutRefs.current.get(message.userId);
+        if (existingTimeout) clearTimeout(existingTimeout);
+
+        // Set new timeout to remove user after 3s
+        const timeout = setTimeout(() => {
+          setTypingUsers((prev) => {
+            const next = new Map(prev);
+            next.delete(message.userId);
+            return next;
+          });
+          typingTimeoutRefs.current.delete(message.userId);
+        }, 3000);
+
+        typingTimeoutRefs.current.set(message.userId, timeout);
+      }
     }
   }, []);
 
-  const { isConnected, connectionError, sendMessage } = useWebSocket({
+  const { isConnected, connectionError, sendMessage, sendJsonMessage } = useWebSocket({
     roomId: room.id,
     userId: currentUser.id,
     nickname: currentUser.nickname,
@@ -98,7 +139,14 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, typingUsers]);
+
+  useEffect(() => {
+    // Cleanup timeouts on unmount
+    return () => {
+      typingTimeoutRefs.current.forEach((timeout) => clearTimeout(timeout));
+    };
+  }, []);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,6 +293,17 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
               )}
             </div>
           ))}
+          {/* Typing Indicator */}
+          {typingUsers.size > 0 && (
+            <div className="px-4 py-2 text-xs text-gray-500 italic">
+              {(() => {
+                const names = Array.from(typingUsers.values());
+                if (names.length === 1) return `${names[0]} is typing...`;
+                if (names.length === 2) return `${names[0]} and ${names[1]} are typing...`;
+                return `${names.length} users are typing...`;
+              })()}
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -254,7 +313,18 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
             <input
               type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setInputValue(value);
+            
+                if (isConnected && value.trim()) {
+                  const now = Date.now();
+                  if (now - lastTypingSent.current > 2000) {
+                    sendJsonMessage({ type: 'user_typing', roomId: room.id, userId: currentUser.id, nickname: currentUser.nickname });
+                    lastTypingSent.current = now;
+                  }
+                }
+              }}
               placeholder={isConnected ? 'Type your message...' : 'Connecting...'}
               disabled={!isConnected}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"

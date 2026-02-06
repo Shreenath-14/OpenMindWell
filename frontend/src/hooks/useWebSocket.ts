@@ -160,10 +160,19 @@ export function useWebSocket({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, userId, nickname]);
 
+  const sendJsonMessage = useCallback((message: any) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(message));
+      return true;
+    }
+    return false;
+  }, []);
+
   return {
     isConnected,
     connectionError,
     sendMessage,
+    sendJsonMessage,
     reconnect: connect,
     disconnect,
   };

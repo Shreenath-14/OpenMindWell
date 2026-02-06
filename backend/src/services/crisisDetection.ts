@@ -97,7 +97,7 @@ async function analyzeWithHuggingFace(
       return null;
     }
 
-    const result: HuggingFaceResponse[][] = await response.json();
+    const result = (await response.json()) as HuggingFaceResponse[][];
     return result[0] || null;
   } catch (error) {
     console.error('Error calling HuggingFace API:', error);
@@ -134,13 +134,11 @@ function analyzeWithKeywords(message: string): CrisisDetectionResult {
   }
 
   // Check medium-risk keywords
-  if (highestRiskLevel === 'none' || highestRiskLevel === 'low') {
+  if (highestRiskLevel === 'none') {
     for (const keyword of CRISIS_KEYWORDS.medium) {
       if (lowerMessage.includes(keyword)) {
         triggeredKeywords.push(keyword);
-        if (highestRiskLevel !== 'medium' && highestRiskLevel !== 'high') {
-          highestRiskLevel = 'medium';
-        }
+        highestRiskLevel = 'medium';
       }
     }
   }

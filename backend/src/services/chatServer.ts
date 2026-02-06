@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { detectCrisis, getCrisisResourcesMessage } from './crisisDetection';
 
 interface ChatMessage {
-  type: 'join' | 'leave' | 'chat' | 'crisis_alert';
+  type: 'join' | 'leave' | 'chat' | 'crisis_alert' | 'user_typing';
   roomId?: string;
   userId?: string;
   nickname?: string;
@@ -79,8 +79,25 @@ export class ChatServer {
       case 'chat':
         await this.handleChatMessage(ws, message);
         break;
+      case 'user_typing':
+        this.handleTyping(ws, message);
+        break;
       default:
         ws.send(JSON.stringify({ type: 'error', message: 'Unknown message type' }));
+    }
+  }
+
+  private handleTyping(ws: WebSocket, message: ChatMessage) {
+    const roomId = (ws as any).roomId;
+    const userId = (ws as any).userId;
+    const nickname = (ws as any).nickname;
+
+    if (roomId && userId && nickname) {
+      this.broadcastToRoom(roomId, {
+        type: 'user_typing',
+        userId,
+        nickname,
+      });
     }
   }
 
