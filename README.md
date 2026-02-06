@@ -45,11 +45,26 @@ Visit http://localhost:3000
 
 For deatailed guide, read [Contributing Guidelines](CONTRIBUTING.md) first.
 
+## Environment Configuration
+
+OpenMindWell now includes **automatic environment validation** on startup to prevent silent failures. The backend server will not start unless the following variables are correctly configured in your `backend/.env` file:
+
+| Variable                    | Validation Rule         | Purpose                                                |
+| :-------------------------- | :---------------------- | :----------------------------------------------------- |
+| `SUPABASE_URL`              | Must be a **valid URL** | Your Supabase project endpoint                         |
+| `SUPABASE_ANON_KEY`         | Cannot be empty         | Public API key for client-side access                  |
+| `SUPABASE_SERVICE_ROLE_KEY` | Cannot be empty         | Secret key for administrative tasks                    |
+| `FRONTEND_URL`              | Must be a **valid URL** | Used for CORS security (e.g., `http://localhost:3000`) |
+| `PORT`                      | Must be a **number**    | The port your backend server runs on                   |
+
+> **Note**: If any of these are missing or improperly formatted, the server will crash immediately with a clear error message explaining what needs fixing.
+
 ## Documentation
 
 **READ THIS FIRST:** [OPENMINDWELL_PROJECT_GUIDE.md](./OPENMINDWELL_PROJECT_GUIDE.md)
 
 This comprehensive guide contains:
+
 - Complete setup instructions
 - Free service account creation
 - Deployment guides
@@ -58,6 +73,7 @@ This comprehensive guide contains:
 ## Tech Stack
 
 **100% Free Services:**
+
 - **Frontend**: React 18, Vite, React Router, TypeScript, Tailwind CSS → Vercel/Netlify
 - **Backend**: Node.js, Express, WebSocket, TypeScript → Render/Railway
 - **Database**: Supabase (PostgreSQL + Auth)
@@ -88,6 +104,7 @@ This comprehensive guide contains:
 ```
 
 **Key Interactions:**
+
 - **User → Frontend**: Browse, chat, journal, track habits
 - **Frontend ↔ Backend**: REST API (journal, habits) + WebSocket (real-time chat)
 - **Frontend → Supabase**: Anonymous authentication, direct queries
@@ -119,6 +136,7 @@ openmindwell/
 We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 Perfect for:
+
 - GSoC, Hacktoberfest, WoC programs
 - Portfolio projects
 - Making a social impact
@@ -128,10 +146,12 @@ Perfect for:
 **If you're in crisis:**
 
 **🇺🇸 United States:**
+
 - **988 Suicide & Crisis Lifeline**: Call/Text 988
 - **Crisis Text Line**: Text HOME to 741741
 
 **🇮🇳 India:**
+
 - **iCall Psychosocial Helpline**: 9152987821 (Mon-Sat, 8 AM - 10 PM IST)
 - **KIRAN Mental Health Helpline**: 1800-599-0019 (24/7, Toll-free)
 
@@ -144,11 +164,13 @@ MIT License - See [LICENSE](./LICENSE) for details
 ## Ethical Use
 
 This platform is designed to:
+
 - Provide peer support and community
 - Share coping strategies and resources
 - Reduce stigma around mental health
 
 This platform is NOT:
+
 - A replacement for therapy or medical treatment
 - Qualified to diagnose or treat mental health conditions
 - A crisis intervention service
@@ -160,6 +182,7 @@ This platform is NOT:
 **[ZenYukti](https://zenyukti.in)** - Building innovative solutions for mental wellness and personal growth.
 
 **Connect with us:**
+
 - Website: [zenyukti.in](https://zenyukti.in)
 - LinkedIn: [linkedin.com/company/zenyukti](https://linkedin.com/company/zenyukti)
 - Twitter/X: [@zenyukti](https://x.com/zenyukti)
@@ -168,4 +191,4 @@ This platform is NOT:
 
 ---
 
-*Remember: Seeking professional help is a sign of strength, not weakness.* 💙
+_Remember: Seeking professional help is a sign of strength, not weakness._ 💙

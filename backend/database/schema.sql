@@ -112,7 +112,7 @@ ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volunteers ENABLE ROW LEVEL SECURITY;
 
--- Profiles policies
+  -- Profiles policies
 CREATE POLICY "Users can view all profiles"
   ON profiles FOR SELECT
   USING (TRUE);

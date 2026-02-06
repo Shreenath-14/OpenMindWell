@@ -3,13 +3,16 @@ import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import config from './config';
+import config, { validateConfig } from './config';
 import { ChatServer } from './services/chatServer';
 import journalRoutes from './routes/journal';
 import habitsRoutes from './routes/habits';
 import resourcesRoutes from './routes/resources';
 import roomsRoutes from './routes/rooms';
 import moderationRoutes from './routes/moderation';
+
+// Validate environment variables before starting
+validateConfig();
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +22,9 @@ new ChatServer(server);
 
 // Middleware
 app.use(helmet());
+
+console.log(`🔧 CORS Origin configured as: ${config.server.frontendUrl}`);
+
 app.use(
   cors({
     origin: config.server.frontendUrl,
