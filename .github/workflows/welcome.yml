@@ -59,7 +59,7 @@ EOF
             fi
 
           # --- CASE 3: FIRST PR MERGED ---
-          elif [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+          elif [[ "${{ github.event_name }}" == "pull_request_target" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
             COUNT=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/search/issues?q=author:$USER_LOGIN+repo:$REPO+type:pr+is:merged" | jq '.total_count')
             if [ "$COUNT" -eq 1 ]; then
               cat <<EOF > body.txt
