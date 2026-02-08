@@ -57,7 +57,7 @@ OpenMindWell now includes **automatic environment validation** on startup to pre
 | `FRONTEND_URL`              | Must be a **valid URL** | Used for CORS security (e.g., `http://localhost:3000`) |
 | `PORT`                      | Must be a **number**    | The port your backend server runs on                   |
 
-> **Note**: If any of these are missing or improperly formatted, the server will crash immediately with a clear error message explaining what needs fixing.
+> **Note**: If any of these are missing or improperly formatted, the server will crash immediately with a clear error message explaining what needs fixing.The PORT is optional because default it set to 3001.
 
 ## Documentation
 

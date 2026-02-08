@@ -22,7 +22,7 @@ interface Config {
 }
 
 
-// 1. Define what needs to be validated
+// Define what needs to be validated
 export const validateConfig = () => {
   const errors: string[] = [];
 
@@ -40,7 +40,7 @@ export const validateConfig = () => {
     }
   });
 
-  // 2. Validate URL formats
+  // Validate URL formats
   const validateUrl = (url: string | undefined, name: string) => {
     if (url) {
       try {
@@ -54,7 +54,7 @@ export const validateConfig = () => {
   validateUrl(process.env.SUPABASE_URL, 'SUPABASE_URL');
   validateUrl(process.env.FRONTEND_URL, 'FRONTEND_URL');
 
-  // 3. Validate PORT is actually a number
+  // Validate PORT is actually a number
   if (process.env.PORT && isNaN(Number(process.env.PORT))) {
     errors.push('PORT must be a valid number'); // Number validation
   }
@@ -62,7 +62,7 @@ export const validateConfig = () => {
   // If there are any errors, throw a combined helpful message
   if (errors.length > 0) {
     throw new Error(
-      `\n❌ Configuration Error:\n${errors.map(err => `  - ${err}`).join('\n')}\n` +
+      `\n Configuration Error:\n${errors.map(err => `  - ${err}`).join('\n')}\n` +
       `Please fix these in your .env file before restarting the server.\n`
     );
   }
