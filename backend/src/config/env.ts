@@ -21,17 +21,6 @@ const envSchema = z.object({
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
 });
 
-const formatErrors = (errors: z.ZodFormattedError<Map<string, string>, string>) => {
-  return Object.entries(errors)
-    .map(([name, value]) => {
-      if (value && '_errors' in value) {
-        return `${name}: ${value._errors.join(', ')}`;
-      }
-      return null;
-    })
-    .filter(Boolean);
-};
-
 const _env = envSchema.safeParse(process.env);
 
 if (!_env.success) {
