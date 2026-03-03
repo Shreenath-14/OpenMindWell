@@ -101,12 +101,13 @@ export class ChatServer {
     const { roomId, userId, nickname } = ws;
 
     if (roomId && userId) {
+      const isTyping = typeof message.isTyping === 'boolean' ? message.isTyping : false;
       // Broadcast to other users in the room
       this.broadcastToRoom(roomId, {
         type: 'typing',
         userId,
         nickname,
-        isTyping: message.isTyping,
+        isTyping,
       }, userId); // Exclude sender
     }
   }
@@ -195,6 +196,14 @@ export class ChatServer {
           nickname,
           timestamp: new Date().toISOString(),
         });
+        
+        // Clear typing indicator for leaving user
+        this.broadcastToRoom(roomId, {
+          type: 'typing',
+          userId,
+          nickname,
+          isTyping: false,
+        });
 
         console.log(`${nickname} left room ${roomId}`);
       }
@@ -271,6 +280,14 @@ export class ChatServer {
           if (member.userId === userId) {
             room.delete(member);
           }
+        });
+        
+        // Clear typing indicator for disconnected user
+        this.broadcastToRoom(roomId, {
+          type: 'typing',
+          userId,
+          nickname: ws.nickname,
+          isTyping: false,
         });
       }
     }

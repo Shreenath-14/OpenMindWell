@@ -37,9 +37,11 @@ export function useWebSocket({
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const reconnectAttemptsRef = useRef(0);
+  const isManualCloseRef = useRef(false);
   const maxReconnectAttempts = 2;
 
   const connect = useCallback(() => {
+    isManualCloseRef.current = false;
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -88,7 +90,7 @@ export function useWebSocket({
         onDisconnect?.();
 
         // Attempt to reconnect with longer delays
-        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+        if (!isManualCloseRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current += 1;
           const delay = Math.min(3000 * Math.pow(2, reconnectAttemptsRef.current), 10000);
           console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
@@ -96,7 +98,7 @@ export function useWebSocket({
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, delay);
-        } else {
+        } else if (!isManualCloseRef.current) {
           setConnectionError('Connection lost. Please refresh to reconnect.');
         }
       };
@@ -125,7 +127,7 @@ export function useWebSocket({
         );
       }
 
-      wsRef.current.onclose = null; // Prevent reconnect loop
+      isManualCloseRef.current = true;
       wsRef.current.close();
       wsRef.current = null;
     }

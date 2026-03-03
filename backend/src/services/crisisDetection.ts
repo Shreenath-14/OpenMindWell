@@ -110,23 +110,23 @@ async function analyzeWithHuggingFace(
  */
 function analyzeWithKeywords(message: string): CrisisDetectionResult {
   const lowerMessage = message.toLowerCase();
-  
-  const foundCritical = CRISIS_KEYWORDS.critical.filter(k => lowerMessage.includes(k));
-  const foundHigh = CRISIS_KEYWORDS.high.filter(k => lowerMessage.includes(k));
-  const foundMedium = CRISIS_KEYWORDS.medium.filter(k => lowerMessage.includes(k));
-  const foundLow = CRISIS_KEYWORDS.low.filter(k => lowerMessage.includes(k));
-  
-  const triggeredKeywords = [...foundCritical, ...foundHigh, ...foundMedium, ...foundLow];
-  
   let highestRiskLevel: 'none' | 'low' | 'medium' | 'high' | 'critical' = 'none';
-  if (foundCritical.length > 0) {
-    highestRiskLevel = 'critical';
-  } else if (foundHigh.length > 0) {
-    highestRiskLevel = 'high';
-  } else if (foundMedium.length > 0) {
-    highestRiskLevel = 'medium';
-  } else if (foundLow.length > 0) {
-    highestRiskLevel = 'low';
+  const triggeredKeywords: string[] = [];
+
+  const riskMap = {
+    critical: CRISIS_KEYWORDS.critical,
+    high: CRISIS_KEYWORDS.high,
+    medium: CRISIS_KEYWORDS.medium,
+    low: CRISIS_KEYWORDS.low,
+  } as const;
+
+  for (const [level, keywords] of Object.entries(riskMap)) {
+    const found = keywords.filter((k) => lowerMessage.includes(k));
+    if (found.length > 0) {
+      triggeredKeywords.push(...found);
+      highestRiskLevel = level as typeof highestRiskLevel;
+      break;
+    }
   }
 
   return {

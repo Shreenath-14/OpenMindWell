@@ -24,6 +24,8 @@ interface ChatRoomProps {
   onClose: () => void;
 }
 
+const EMPTY_SET = new Set<string>();
+
 export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -119,7 +121,7 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
     typingTimeoutRef.current = setTimeout(() => {
       sendTyping(false);
       typingTimeoutRef.current = undefined;
-    }, 1000);
+    }, 2000);
   };
 
 
@@ -134,7 +136,7 @@ export default function ChatRoom({ room, currentUser, onClose }: ChatRoomProps) 
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      setTypingUsers(new Set());
+      setTypingUsers(prev => prev.size > 0 ? EMPTY_SET : prev);
     };
   }, []);
 
